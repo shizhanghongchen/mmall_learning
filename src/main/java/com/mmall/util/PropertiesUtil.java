@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.util.Properties;
 
 /**
- * Created by geely
+ * Created by wb-yxk397023 on 2018/7/25.
  */
 public class PropertiesUtil {
 
@@ -17,33 +17,49 @@ public class PropertiesUtil {
 
     private static Properties props;
 
+    /**
+     * 初始化
+     */
     static {
+        // 默认配置
         String fileName = "mmall.properties";
         props = new Properties();
         try {
-            props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName),"UTF-8"));
+            // 执行加载
+            props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName), "UTF-8"));
         } catch (IOException e) {
-            logger.error("配置文件读取异常",e);
+            logger.error("配置文件读取异常", e);
         }
     }
 
-    public static String getProperty(String key){
+    /**
+     * 通过key获取value
+     *
+     * @param key
+     * @return
+     */
+    public static String getProperty(String key) {
         String value = props.getProperty(key.trim());
-        if(StringUtils.isBlank(value)){
+        if (StringUtils.isBlank(value)) {
             return null;
         }
         return value.trim();
     }
 
-    public static String getProperty(String key,String defaultValue){
-
+    /**
+     * 通过key获取value(兜底)
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    public static String getProperty(String key, String defaultValue) {
         String value = props.getProperty(key.trim());
-        if(StringUtils.isBlank(value)){
+        if (StringUtils.isBlank(value)) {
             value = defaultValue;
         }
         return value.trim();
     }
-
 
 
 }
