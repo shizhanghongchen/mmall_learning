@@ -221,9 +221,9 @@ public class ProductManageController {
             }
             // 上传成功的情况
             String url = PropertiesUtil.getProperty("ftp.server.http.prefix") + targetFileName;
-            resultMap.put("success", true);
-            resultMap.put("msg", "上传成功");
             resultMap.put("file_path", url);
+            resultMap.put("msg", "上传成功");
+            resultMap.put("success", true);
             // 上传成功后处理response的返回信息
             response.addHeader("Access-Control-Allow-Headers", "X-File-Name");
             return resultMap;
