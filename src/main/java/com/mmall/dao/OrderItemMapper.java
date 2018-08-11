@@ -26,4 +26,19 @@ public interface OrderItemMapper {
      * @return
      */
     List<OrderItem> getByOrderNoUserId(@Param("orderNo") Long orderNo, @Param("userId") Integer userId);
+
+    /**
+     * myBatis 批量插入
+     *
+     * @param orderItemList
+     */
+    void batchInsert(@Param("orderItemList") List<OrderItem> orderItemList);
+
+    /**
+     * 管理员获取订单信息(后台)
+     *
+     * @param orderNo
+     * @return
+     */
+    List<OrderItem> getByOrderNo(@Param("orderNo") Long orderNo);
 }
