@@ -8,7 +8,10 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
- * Created by wb-yxk397023 on 2018/7/25.
+ * 时间日期处理类
+ *
+ * @author wb-yxk397023
+ * @date 2018/7/25
  */
 public class DateTimeUtil {
 
