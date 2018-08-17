@@ -44,6 +44,8 @@ public class CookieUtil {
         // 设置cookie有效期(-1代表永久有效,单位为妙)
         // 如果不设置该属性,cookie将不会被写入硬盘,而是写入内存只在当前页面有效
         ck.setMaxAge(COOKIE_MAX_AGE);
+        // 防止脚本攻击(防止信息泄露风险)
+        ck.setHttpOnly(true);
         log.info("write cookieName:{}, cookieValue:{}", ck.getName(), ck.getValue());
         // 将cookie设置到response中
         response.addCookie(ck);
