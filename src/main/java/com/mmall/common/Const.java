@@ -21,6 +21,14 @@ public class Const {
     public static final String USERNAME = "username";
 
     /**
+     * 设置redis缓存时间
+     */
+    public interface RedisCacheExtime {
+        // session过期时间
+        int REDIS_SESSION_EXTIME = 60 * 30;
+    }
+
+    /**
      * 购物车标识
      */
     public interface Cart {
