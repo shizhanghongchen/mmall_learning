@@ -58,7 +58,6 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private ShippingMapper shippingMapper;
 
-
     /**
      * 创建订单
      *

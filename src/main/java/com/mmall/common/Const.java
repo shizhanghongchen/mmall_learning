@@ -21,6 +21,11 @@ public class Const {
     public static final String USERNAME = "username";
 
     /**
+     * token前缀
+     */
+    public static final String TOKEN_PREFIX = "token_";
+
+    /**
      * 设置redis缓存时间
      */
     public interface RedisCacheExtime {
