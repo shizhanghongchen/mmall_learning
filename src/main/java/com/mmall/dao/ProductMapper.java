@@ -42,4 +42,12 @@ public interface ProductMapper {
      * @return
      */
     List<Product> selectByNameAndCategoryIds(@Param("productName") String productName, @Param("categoryIdList") List<Integer> categoryIdList);
+
+    /**
+     * 根据产品id删除产品库存数量(返回值一定要使用Integer,因为int不能为NULL,考虑到很多商品有可能会被删除的情况)
+     *
+     * @param id
+     * @return
+     */
+    Integer selectStockByProductId(Integer id);
 }

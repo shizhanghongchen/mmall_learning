@@ -49,4 +49,21 @@ public interface OrderMapper {
      * @return
      */
     List<Order> selectAllOrder();
+
+    /**
+     * 查询需要进行定时关单的订单list
+     *
+     * @param status
+     * @param date
+     * @return
+     */
+    List<Order> selectOrderStatusByCreateTime(@Param("status") Integer status, @Param("date") String date);
+
+    /**
+     * 关闭订单
+     *
+     * @param id
+     * @return
+     */
+    int closeOrderByOrderId(Integer id);
 }

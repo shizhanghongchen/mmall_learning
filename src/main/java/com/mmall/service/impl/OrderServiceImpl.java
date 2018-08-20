@@ -30,6 +30,7 @@ import com.mmall.vo.ShippingVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -283,6 +284,44 @@ public class OrderServiceImpl implements IOrderService {
             }
         }
         return ServerResponse.createByErrorMessage("订单不存在");
+    }
+
+    /**
+     * hour个小时内未付款的订单进行关闭操作
+     *
+     * @param hour
+     */
+    @Override
+    public void closeOrder(int hour) {
+        // 声明关单时间(当前时间减去传入的时间)
+        Date closeDateTime = DateUtils.addHours(new Date(), -hour);
+        // 根据关单时间查询出符合条件的订单列表
+        List<Order> orderList = orderMapper.selectOrderStatusByCreateTime(Const.OrderStatusEnum.NO_PAY.getCode(), DateTimeUtil.dateToStr(closeDateTime));
+        // 遍历订单集合
+        for (Order order : orderList) {
+            // 获取单个订单详情
+            List<OrderItem> orderItemList = orderItemMapper.getByOrderNo(order.getOrderNo());
+            // 遍历订单详情集合
+            for (OrderItem orderItem : orderItemList) {
+                // 查询产品库存(为了防止锁表一定要使用主键,同时必须支持MySql的InnoDB)
+                Integer stock = productMapper.selectStockByProductId(orderItem.getId());
+                // 如果stock为空则直接跳出(考虑到已生成的订单里的商品被删除的情况)
+                if (stock == null) {
+                    continue;
+                }
+                // 创建产品容器
+                Product product = new Product();
+                // 设置id
+                product.setId(orderItem.getId());
+                // 设置新的库存(库中的库存数量 + 订单中的库存数量)
+                product.setStock(stock + orderItem.getQuantity());
+                // 更新商品信息
+                productMapper.updateByPrimaryKeySelective(product);
+            }
+            // 关闭订单
+            orderMapper.closeOrderByOrderId(order.getId());
+            log.info("关闭订单OrderNo:{}", order.getOrderNo());
+        }
     }
 
     /**
