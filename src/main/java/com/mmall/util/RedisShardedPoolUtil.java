@@ -124,6 +124,29 @@ public class RedisShardedPoolUtil {
     }
 
     /**
+     * getSet API
+     * (在set的同时返回旧值,此操作具有原子性)
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public static String getSet(String key, String value) {
+        ShardedJedis jedis = null;
+        String result = null;
+        try {
+            jedis = RedisShardedPool.getJedis();
+            result = jedis.getSet(key, value);
+        } catch (Exception e) {
+            log.error("getSet key:{} value:{} error", key, value, e);
+            RedisShardedPool.returnBrokenResource(jedis);
+            return result;
+        }
+        RedisShardedPool.returnResource(jedis);
+        return result;
+    }
+
+    /**
      * del API
      *
      * @param key
