@@ -121,7 +121,7 @@ public class CloseOrderTask {
         // 标记
         boolean getLock = false;
         try {
-            // 判断是否获取锁是否成功
+            // 判断是否获取锁是否成功(waitTime时间建议设置为0解决锁竞争问题)
             if (getLock = rLock.tryLock(0, 5, TimeUnit.SECONDS)) {
                 log.info("Redisson获取到分布式锁:{},ThreadName:{}", Const.REDIS_LOCK.CLOSE_ORDER_TASK_LOCK, Thread.currentThread().getName());
                 int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.task.time.hour", "2"));
