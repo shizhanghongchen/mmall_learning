@@ -1,14 +1,18 @@
 package com.mmall.task;
 
 import com.mmall.common.Const;
+import com.mmall.common.RedissonManager;
 import com.mmall.service.IOrderService;
 import com.mmall.util.PropertiesUtil;
 import com.mmall.util.RedisShardedPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 定时关单
@@ -22,6 +26,8 @@ public class CloseOrderTask {
 
     @Autowired
     private IOrderService iOrderService;
+    @Autowired
+    private RedissonManager redissonManager;
 
     /**
      * 针对分布式锁V2.0版本特殊情况下死锁的解决方案(如果使用shutdown方式重启容器此方法将会被调用,分布式锁将会统一得到处理)
@@ -70,7 +76,7 @@ public class CloseOrderTask {
      * 订单关单的逻辑(V3.0)
      * 每一分钟执行一次(每个一分钟的整数倍)
      */
-    @Scheduled(cron = "0 */1 * * * ?")
+    // @Scheduled(cron = "0 */1 * * * ?")
     public void closeOrderTaskV3() {
         log.info("关闭订单定时任务启动");
         // 设置超时时间
@@ -101,6 +107,38 @@ public class CloseOrderTask {
             }
         }
         log.info("关闭订单定时任务结束");
+    }
+
+    /**
+     * 订单关单的逻辑(V4.0)
+     * 每一分钟执行一次(每个一分钟的整数倍)
+     * redisson框架实现
+     */
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void closeOrderTaskV4() {
+        // 获取可重入锁
+        RLock rLock = redissonManager.getRedisson().getLock(Const.REDIS_LOCK.CLOSE_ORDER_TASK_LOCK);
+        // 标记
+        boolean getLock = false;
+        try {
+            // 判断是否获取锁是否成功
+            if (getLock = rLock.tryLock(2, 5, TimeUnit.SECONDS)) {
+                log.info("Redisson获取到分布式锁:{},ThreadName:{}", Const.REDIS_LOCK.CLOSE_ORDER_TASK_LOCK, Thread.currentThread().getName());
+                int hour = Integer.parseInt(PropertiesUtil.getProperty("close.order.task.time.hour", "2"));
+                iOrderService.closeOrder(hour);
+            } else {
+                log.info("Redisson没有获取到分布式锁:{},ThreadName:{}", Const.REDIS_LOCK.CLOSE_ORDER_TASK_LOCK, Thread.currentThread().getName());
+            }
+        } catch (InterruptedException e) {
+            log.error("Redisson分布式锁获取异常", e);
+        } finally {
+            if (!getLock) {
+                return;
+            }
+            // 释放锁
+            rLock.unlock();
+            log.info("Redisson分布式锁获取释放");
+        }
     }
 
     /**
